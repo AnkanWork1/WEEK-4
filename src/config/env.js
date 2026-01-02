@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
-console.log("🔵 env.js running");
+import logger from "../utils/logger.js";
+logger.info("🔵 env.js running");
 export function loadEnv() {
     console.log("🌱 Loading environment variables...");
   const env = process.env.NODE_ENV || "local";
@@ -19,5 +20,5 @@ export function loadEnv() {
     process.exit(1);
   }
 
-  console.log(`🌱 Environment loaded: ${env}`);
+  logger.info(`🌱 Environment loaded: ${env}`);
 }

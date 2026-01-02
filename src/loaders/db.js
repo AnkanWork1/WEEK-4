@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
-import { logger } from "../utils/logger.js";
-
+import  logger  from "../utils/logger.js";
+logger.info("🟢 db.js running");
 export async function connectDB(uri) {
   if (!uri) {
     logger.error("❌ DB_URI is undefined! Check your .env file.");
