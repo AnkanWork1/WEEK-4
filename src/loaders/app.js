@@ -1,9 +1,11 @@
 import express from "express";
 import productRoutes from "../routes/product.routes.js"; // if you have product routes
+import userRoutes from "../routes/userRoutes.js";
+import { securityMiddleware } from "../middlewares/security.js";
 
 export async function loadApp() {
   const app = express();
-
+  securityMiddleware(app); // attach globally
   app.use(express.json());
 
   // Ping route
@@ -14,6 +16,8 @@ export async function loadApp() {
 
   // Product routes
   app.use("/products", productRoutes);
+
+  app.use("/api/users", userRoutes);
 
   return app;
 }
