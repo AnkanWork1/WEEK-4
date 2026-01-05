@@ -6,14 +6,39 @@ import fs from "fs";
 const logDir = path.join(process.cwd(), "src/logs");
 if (!fs.existsSync(logDir)) fs.mkdirSync(logDir, { recursive: true });
 
-const logFile = path.join(logDir, "log.txt");
+/**
+ * Base pino config (shared)
+ */
+const baseConfig = {
+  level: process.env.LOG_LEVEL || "info",
+  timestamp: pino.stdTimeFunctions.isoTime
+};
 
-const logger = pino(
-  {
-    level: process.env.LOG_LEVEL || "info",
-    timestamp: pino.stdTimeFunctions.isoTime, // ISO timestamp
-  },
-  pino.destination(logFile)
+/**
+ * API Logger
+ */
+const apiLogger = pino(
+  baseConfig,
+  pino.destination(path.join(logDir, "app.log"))
 );
 
-export default logger;
+/**
+ * Worker Logger
+ */
+const workerLogger = pino(
+  baseConfig,
+  pino.destination(path.join(logDir, "worker.log"))
+);
+
+/**
+ * Create request-scoped logger
+ * Adds requestId automatically
+ */
+export const withRequest = (req) => {
+  return apiLogger.child({
+    requestId: req.requestId,
+    service: "api"
+  });
+};
+
+export { apiLogger, workerLogger };

@@ -1,34 +1,34 @@
 import express from "express";
-import productRoutes from "../routes/product.routes.js";
+import productRoutes from "../routes/product.routes.js"; // if you have product routes
 import userRoutes from "../routes/userRoutes.js";
 import { securityMiddleware } from "../middlewares/security.js";
 import { requestLogger } from "../middlewares/logger.js";
 import { errorHandler } from "../middlewares/error.middleware.js";
-import logger from "../utils/logger.js";
+import { requestTracing } from "../utils/tracing.js";
+import notifyRoutes from "../routes/notify.routes.js";
+
+import emailRoutes from "../routes/email.routes.js";
 
 export async function loadApp() {
   const app = express();
-
-  // Security
-  securityMiddleware(app);
-
-  // Body parser
+  securityMiddleware(app); // attach globally
   app.use(express.json());
-
-  // Request logger
   app.use(requestLogger);
-
-  // Routes
-  app.get("/ping", (req, res) => res.send("pong"));
-  app.get("/", (req, res) => res.send("Hello Day kebdwebwe"));
-  app.use("/products", productRoutes);
-  app.use("/api/users", userRoutes);
-
-  // Error handler
   app.use(errorHandler);
 
-  // Log server ready
-  logger.info("✅ Server ready and running");
+  app.use(requestTracing);
+
+app.use("/api", emailRoutes);
+  // Ping route
+  app.get("/ping", (req, res) => res.send("pong"));
+
+  // Optional root route
+  app.get("/", (req, res) => res.send("Hello Day kebdwebwe"));
+
+  // Product routes
+  app.use("/products", productRoutes);
+
+  app.use("/api/users", userRoutes);
 
   return app;
 }

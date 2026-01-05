@@ -1,22 +1,66 @@
 import { loadApp } from "./loaders/app.js";
-import { connectDB } from "./loaders/db.js"; // your existing DB loader
+import { connectDB } from "./loaders/db.js";
 import { config } from "./config/index.js";
 import { loadEnv } from "./config/env.js";
-import logger from "./utils/logger.js";
+import { apiLogger } from "./utils/logger.js";
+
 loadEnv();
 
 async function startServer() {
   const cfg = config();
 
-  // Connect MongoDB
-  await connectDB(cfg.db.uri);
+  try {
+    apiLogger.info(
+      {
+        service: "api",
+        stage: "bootstrap"
+      },
+      "Starting server bootstrap"
+    );
 
-  // Load Express app
-  const app = await loadApp();
+    // Connect MongoDB
+    await connectDB(cfg.db.uri);
+    apiLogger.info(
+      {
+        service: "api",
+        stage: "database"
+      },
+      "MongoDB connected"
+    );
 
-  // Start server
-  const PORT = cfg.port || 3000;
-  app.listen(PORT, () => logger.info("✅ Server running on port 3000"));
+    // Load Express app
+    const app = await loadApp();
+    apiLogger.info(
+      {
+        service: "api",
+        stage: "app"
+      },
+      "Express app loaded"
+    );
+
+    // Start server
+    const PORT = cfg.port || 3000;
+    app.listen(PORT, () => {
+      apiLogger.info(
+        {
+          service: "api",
+          stage: "listen",
+          port: PORT
+        },
+        `Server running on port ${PORT}`
+      );
+    });
+  } catch (err) {
+    apiLogger.error(
+      {
+        err,
+        service: "api",
+        stage: "fatal"
+      },
+      "Server failed to start"
+    );
+    process.exit(1);
+  }
 }
 
 startServer();
