@@ -15,7 +15,7 @@ export const securityMiddleware = (app) => {
 
   // Rate limiting
   const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
+    windowMs: 15 * 60 * 1000,//15 minutes
     max: 10000,
     message: "Too many requests. Try again later.",
   });
